@@ -1,0 +1,98 @@
+[
+  {
+    "id": "genesis",
+    "name": "Genesis Racing",
+    "country": "South Korea",
+    "class": "Hypercar",
+    "features": "현대자동차의 프리미엄 브랜드 제네시스가 르망24시 최상위 등급인 하이퍼카(LMDh 규정) 클래스 참전을 공식 선언했습니다. 고성능 기술력 입증과 글로벌 프리미엄 브랜드 이미지 강화를 목표로 독자적인 차량 개발을 조율하고 있으며, 모터스포츠 팬들의 엄청난 기대를 모으고 있습니다.",
+    "logoColor": "#111111"
+  },
+  {
+    "id": "ferrari",
+    "name": "Ferrari AF Corse",
+    "country": "Italy",
+    "class": "Hypercar",
+    "features": "이탈리아의 자존심이자 F1의 전설 페라리의 르망 공식 팀입니다. 2023년 50년 만에 복귀하자마자 100주년 대회를 우승하고, 이어서 2024년, 2025년까지 3연속 우승을 쓸어 담으며 최강의 저력을 보여주고 있는 최고 권위의 팀입니다.",
+    "logoColor": "#C4151C"
+  },
+  {
+    "id": "porsche",
+    "name": "Porsche Penske Motorsport",
+    "country": "Germany",
+    "class": "Hypercar",
+    "features": "르망 역사상 통산 최다 우승(19회) 기록을 보유한 포르쉐와 미국의 명문 팀 펜스키가 결성한 팩토리 드림팀입니다. 안정적이고 완성도 높은 하이브리드 머신 963을 통해 매년 우승 후보 1순위로 지목되고 있습니다.",
+    "logoColor": "#D5002C"
+  },
+  {
+    "id": "toyota",
+    "name": "Toyota Gazoo Racing",
+    "country": "Japan",
+    "class": "Hypercar",
+    "features": "2018년부터 2022년까지 르망 5연패를 달성한 내구레이스의 지배자입니다. 높은 내구성 신뢰도와 풍부한 24시간 레이스 운영 경험을 바탕으로 완벽에 가까운 팀워크와 노련한 레이스 전략을 구사합니다.",
+    "logoColor": "#E2001A"
+  },
+  {
+    "id": "cadillac",
+    "name": "Cadillac Racing",
+    "country": "USA",
+    "class": "Hypercar",
+    "features": "5.5리터 자연흡기 V8 엔진을 탑재하여 서킷 전체를 뒤흔드는 마초적인 배기 사운드로 가장 높은 현장 인기를 누리는 팀입니다. 강력한 직진 가속도와 독특한 실루엣이 상징적입니다.",
+    "logoColor": "#000000"
+  },
+  {
+    "id": "bmw",
+    "name": "BMW M Team WRT",
+    "country": "Germany",
+    "class": "Hypercar",
+    "features": "유럽 유수의 내구레이스 명가 WRT 팀이 운영을 맡고, BMW M 부서의 하이퍼카 M Hybrid V8을 결합했습니다. 예술적이고 개성 넘치는 리버리 아트카 디자인과 강렬한 프론트 그릴 디자인이 인상적입니다.",
+    "logoColor": "#0099FF"
+  },
+  {
+    "id": "alpine",
+    "name": "Alpine Endurance Team",
+    "country": "France",
+    "class": "Hypercar",
+    "features": "프랑스를 대표하는 스포츠카 브랜드 알핀의 하이퍼카 팀입니다. 프렌치 블루 컬러가 감싸안은 유려한 A424 차량을 선보이며 홈 팬들의 열성적인 응원을 등에 업고 상위권 도약을 목표로 하고 있습니다.",
+    "logoColor": "#001E62"
+  },
+  {
+    "id": "jota",
+    "name": "Hertz Team JOTA",
+    "country": "UK",
+    "class": "Hypercar",
+    "features": "포르쉐 963 차량을 공급받아 출전하는 하이퍼카 클래스의 최강 프라이빗(민간) 팀입니다. 화려한 금빛 골드 리버리를 두르고 팩토리 팀 못지않은 우수한 스피드와 전략으로 포디움을 위협합니다.",
+    "logoColor": "#FFD700"
+  },
+  {
+    "id": "irondames",
+    "name": "Iron Dames",
+    "country": "Italy",
+    "class": "LMGT3",
+    "features": "여성 모터스포츠 활성화를 목표로 전원 여성 레이서로만 구성된 역사적인 팀입니다. 눈에 띄는 핫핑크 컬러의 람보르기니 Huracan 차량을 운용하며 우수한 주행력과 승부처 결단력으로 클래스 우승을 사수하는 강팀입니다.",
+    "logoColor": "#FF3399"
+  },
+  {
+    "id": "proton",
+    "name": "Proton Competition",
+    "country": "Germany",
+    "class": "LMGT3",
+    "features": "포르쉐 차량을 기반으로 수십 년간 내구 레이스의 중추 역할을 해온 역사 깊은 GT 명가입니다. 숙련된 드라이버 관리와 피트워크로 기복 없는 레이스 주행을 자랑합니다.",
+    "logoColor": "#333333"
+  },
+  {
+    "id": "united",
+    "name": "United Autosports",
+    "country": "UK",
+    "class": "LMGT3",
+    "features": "맥라렌의 GT3 머신을 들고 출전하는 다국적 강팀입니다. 정교하게 다듬어진 차체 에어로다이내믹 기술과 프로 및 아마추어 드라이버의 균형 있는 경기 조율이 돋보입니다.",
+    "logoColor": "#0C2340"
+  },
+  {
+    "id": "akkodis",
+    "name": "Akkodis ASP Team",
+    "country": "France",
+    "class": "LMGT3",
+    "features": "렉서스 RC F GT3 차량을 조율하는 GT 무대의 잔뼈 굵은 실력파 팀입니다. 타 차량 대비 높은 직선 구간 스피드와 우수한 고속 코너 안정성을 살려 순위 경쟁에 뛰어듭니다.",
+    "logoColor": "#FF8000"
+  }
+]

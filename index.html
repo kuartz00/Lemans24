@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="르망24 내구 레이스 입문자를 위한 가장 직관적이고 친절한 가이드 가이드북 모바일 웹앱. 핵심 규칙, 클래스 비교, 실시간 참전 팀 정보 제공.">
+  <title>르망24 가이드 - Le Mans 24 Guide MVP</title>
+  
+  <!-- Modern Style Sheets -->
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Background Circuit Watermark SVG -->
+    <svg class="circuit-bg-watermark" viewBox="0 0 1000 600" aria-hidden="true">
+      <path d="M 180 420 L 220 300 Q 240 250, 300 240 L 550 240 L 570 250 L 590 230 L 700 230 L 710 245 L 720 230 L 780 230 Q 810 250, 790 280 L 760 320 Q 750 340, 760 360 L 780 380 Q 800 410, 760 430 L 720 450 Q 690 460, 680 480 L 670 520 Q 650 560, 610 560 L 540 560 Q 500 560, 470 530 L 400 460 Q 370 430, 340 450 L 290 490 Q 250 530, 200 500 L 180 470 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+
+    <!-- Top Fixed Header -->
+    <header class="app-header">
+      <div class="brand-logo">
+        <img src="./assets/LM_icon.png" alt="르망24 가이드 로고" class="brand-logo-img">
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Information Source External Link -->
+        <a href="./sources.html" style="font-size: 0.75rem; color: var(--text-secondary); text-decoration: none; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: var(--border-radius-sm); font-weight: 700; transition: all var(--transition-speed) ease;" aria-label="정보 출처 및 면책조항 페이지 이동">
+          정보 출처
+        </a>
+        <!-- Dark/Light Theme Toggle Button -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="테마 전환">
+          <!-- Sun Icon (Show in dark mode to switch to light) -->
+          <svg class="sun-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" fill="none"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <!-- Moon Icon (Show in light mode to switch to dark) -->
+          <svg class="moon-icon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      
+      <!-- SCREEN 1: HOME (홈) -->
+      <section id="section-home" class="app-section active">
+        <div class="home-hero">
+          <span class="hero-tag">LE MANS 24 GUIDE</span>
+          <h2 class="hero-title">단 3분 만에<br>이해하는 르망24</h2>
+          <p class="hero-subtitle">가장 혹독한 24시간의 질주, 모터스포츠의 꽃 르망 24시 레이스의 핵심 가이드를 읽고 가슴 뛰는 레이스를 맞이하세요.</p>
+          <div class="hero-ctas">
+            <button id="cta-go-beginner" class="btn btn-primary" aria-label="초보자 관전 가이드로 이동">
+              <span>3분 입문하기</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button id="cta-go-results" class="btn btn-secondary" aria-label="최근 경기 결과로 이동">
+              <span>최근 경기 보기</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 오늘의 한 줄 정보 -->
+        <div class="fact-box">
+          <span class="fact-icon" aria-hidden="true">💡</span>
+          <div class="fact-content">
+            <div class="fact-title">오늘의 한 줄 정보</div>
+            <div id="daily-fact-text" class="fact-text">로딩 중...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: WHAT IS LE MANS (르망24란?) -->
+      <section id="section-about" class="app-section">
+        <h1 class="section-title"><span>Introduction</span>르망24란 무엇인가?</h1>
+        <p class="section-subtitle">기초적인 역사와 대회 목적에 대해 아코디언 메뉴를 눌러 확인하세요.</p>
+        
+        <!-- Accordion Group -->
+        <div id="history-accordion-container" class="accordion-group">
+          <!-- Accordion items loaded dynamically from app.js -->
+        </div>
+
+        <!-- Wikipedia API Section -->
+        <div id="wiki-api-container">
+          <!-- Loaded dynamically via Wikipedia REST API with sessionStorage Cache -->
+        </div>
+      </section>
+
+      <!-- SCREEN 3: BEGINNER GUIDE (초보자 관전 가이드) -->
+      <section id="section-guide" class="app-section">
+        <h1 class="section-title"><span>Beginners Guide</span>초보자 관전 가이드</h1>
+        <p class="section-subtitle">르망 24시 레이스를 한눈에 파악하기 위한 5대 체크포인트입니다.</p>
+
+        <div class="guide-grid">
+          
+          <!-- Card 1 -->
+          <div class="glass-card guide-card">
+            <div class="guide-card-icon" aria-hidden="true">🏆</div>
+            <div class="guide-card-content">
+              <div class="guide-card-num">Point 01</div>
+              <h3 class="guide-card-title">우승 조건</h3>
+              <p class="guide-card-desc">체커기가 흔들리기 전까지 24시간 동안 가장 긴 거리를 달린 레이싱카가 영광의 트로피를 차지합니다.</p>
+              <div class="guide-card-summary">30초 요약: 속도보다 누적 주행거리가 최우선!</div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="glass-card guide-card">
+            <div class="guide-card-icon" aria-hidden="true">🚥</div>
+            <div class="guide-card-content">
+              <div class="guide-card-num">Point 02</div>
+              <h3 class="guide-card-title">클래스 이해</h3>
+              <p class="guide-card-desc">세 가지의 성능이 완전히 다른 차량 종류(Hypercar, LMP2, LMGT3)들이 동일한 서킷에서 섞여 달립니다.</p>
+              <div class="guide-card-summary">30초 요약: 추월 상황에서의 주행 흐름 파악이 핵심!</div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="glass-card guide-card">
+            <div class="guide-card-icon" aria-hidden="true">🛠️</div>
+            <div class="guide-card-content">
+              <div class="guide-card-num">Point 03</div>
+              <h3 class="guide-card-title">피트 전략</h3>
+              <p class="guide-card-desc">레이스카는 연료 충전, 타이어 교체, 드라이버 교대를 위해 정기적으로 피트인을 해야 합니다. 타이밍이 순위를 바꿉니다.</p>
+              <div class="guide-card-summary">30초 요약: 피트 스톱에서의 짧은 시간 단축이 승패 좌우!</div>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="glass-card guide-card">
+            <div class="guide-card-icon" aria-hidden="true">🌙</div>
+            <div class="guide-card-content">
+              <div class="guide-card-num">Point 04</div>
+              <h3 class="guide-card-title">밤 경기 포인트</h3>
+              <p class="guide-card-desc">가로등이 거의 없는 시속 300km/h 초고속 코스에서 헤드라이트 불빛만 의존해 달리는 심야 주행은 사고 위험이 매우 높습니다.</p>
+              <div class="guide-card-summary">30초 요약: 새벽 시간대 집중력 유지가 핵심 관전 포인트!</div>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="guide-card glass-card">
+            <div class="guide-card-icon" aria-hidden="true">🏁</div>
+            <div class="guide-card-content">
+              <div class="guide-card-num">Point 05</div>
+              <h3 class="guide-card-title">주목 팀 (현대/제네시스)</h3>
+              <p class="guide-card-desc">오랫동안 지배자로 군림하던 포르쉐, 토요타, 페라리 삼파전에 최근 현대자동차가 프리미엄 브랜드 제네시스로 참전을 예고했습니다.</p>
+              <div class="guide-card-summary">30초 요약: 한국 제네시스 브랜드를 필두로 불붙은 왕좌 쟁탈전!</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SCREEN 4: CIRCUIT (사르트 서킷) -->
+      <section id="section-circuit" class="app-section">
+        <h1 class="section-title"><span>Circuit Guide</span>사르트 서킷</h1>
+        <p class="section-subtitle">르망 24시의 무대, Circuit de la Sarthe의 구간별 특성과 공략법을 살펴보세요.</p>
+
+        <!-- 서킷 소개 카드 -->
+        <div class="glass-card circuit-intro-card">
+          <div class="circuit-intro-stats">
+            <div class="circuit-stat">
+              <div class="circuit-stat-value">13.626<span>km</span></div>
+              <div class="circuit-stat-label">전체 길이</div>
+            </div>
+            <div class="circuit-stat">
+              <div class="circuit-stat-value">38<span>개</span></div>
+              <div class="circuit-stat-label">코너 수</div>
+            </div>
+            <div class="circuit-stat">
+              <div class="circuit-stat-value">345<span>km/h</span></div>
+              <div class="circuit-stat-label">최고 속도</div>
+            </div>
+            <div class="circuit-stat">
+              <div class="circuit-stat-value">~3:20<span></div>
+              <div class="circuit-stat-label">랩타임 (Hypercar)</div>
+            </div>
+          </div>
+          <p class="circuit-intro-text">
+            Circuit de la Sarthe(사르트 서킷)는 르망 시내 주변의 일반 공용도로와 상설 서킷 구간을 연결한 혼합형 서킷입니다. 
+            뮬산 스트레이트의 직선 전속력 질주부터 뮬산 코너의 극한 감속 구간까지, 세계에서 가장 다양하고 혹독한 서킷 환경을 제공합니다.
+          </p>
+        </div>
+
+        <!-- SVG Circuit Map -->
+        <div class="circuit-map-container">
+          <div class="circuit-map-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--primary-color)" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            구간별 서킷 맵 — 클릭하여 상세 정보 확인
+          </div>
+          <div class="circuit-svg-wrapper">
+            <svg id="circuit-map-svg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" aria-label="사르트 서킷 구간 맵">
+              
+              <!-- 서킷 트랙 배경 (두꺼운 선) -->
+              <path class="circuit-track-bg" d="
+                M 120 380
+                L 145 280
+                Q 160 210, 220 195
+                L 490 195
+                L 510 183
+                L 530 165
+                L 620 165
+                L 635 178
+                L 650 162
+                L 760 162
+                Q 800 178, 782 210
+                L 750 255
+                Q 738 275, 750 298
+                L 768 318
+                Q 790 345, 752 368
+                L 710 390
+                Q 678 402, 666 425
+                L 654 465
+                Q 633 498, 592 500
+                L 515 500
+                Q 474 500, 443 468
+                L 368 395
+                Q 336 362, 304 382
+                L 252 423
+                Q 210 458, 165 432
+                L 140 408
+                Z
+              "/>
+
+              <!-- 서킷 트랙 라인 (얇은 강조선) -->
+              <path class="circuit-track-line" d="
+                M 120 380
+                L 145 280
+                Q 160 210, 220 195
+                L 490 195
+                L 510 183
+                L 530 165
+                L 620 165
+                L 635 178
+                L 650 162
+                L 760 162
+                Q 800 178, 782 210
+                L 750 255
+                Q 738 275, 750 298
+                L 768 318
+                Q 790 345, 752 368
+                L 710 390
+                Q 678 402, 666 425
+                L 654 465
+                Q 633 498, 592 500
+                L 515 500
+                Q 474 500, 443 468
+                L 368 395
+                Q 336 362, 304 382
+                L 252 423
+                Q 210 458, 165 432
+                L 140 408
+                Z
+              "/>
+
+              <!-- === 구간 클릭 영역 및 라벨 === -->
+
+              <!-- 구간 1: Ford Chicanes (출발/결승선 구역) -->
+              <g class="circuit-sector" data-sector="ford" tabindex="0" role="button" aria-label="Ford Chicanes 구간 정보">
+                <rect class="sector-hit-area" x="100" y="350" width="90" height="80" rx="4"/>
+                <circle class="sector-dot" cx="132" cy="390" r="8"/>
+                <text class="sector-label" x="80" y="345">Ford</text>
+                <text class="sector-label-sub" x="80" y="360">Chicanes</text>
+                <line class="sector-connector" x1="130" y1="375" x2="108" y2="355"/>
+              </g>
+
+              <!-- 구간 2: Dunlop Curves -->
+              <g class="circuit-sector" data-sector="dunlop" tabindex="0" role="button" aria-label="Dunlop Curves 구간 정보">
+                <rect class="sector-hit-area" x="128" y="195" width="90" height="60" rx="4"/>
+                <circle class="sector-dot" cx="178" cy="237" r="8"/>
+                <text class="sector-label" x="20" y="220">Dunlop</text>
+                <text class="sector-label-sub" x="20" y="235">Curves</text>
+                <line class="sector-connector" x1="162" y1="233" x2="88" y2="230"/>
+              </g>
+
+              <!-- 구간 3: Mulsanne Straight -->
+              <g class="circuit-sector" data-sector="mulsanne" tabindex="0" role="button" aria-label="Mulsanne Straight 구간 정보">
+                <rect class="sector-hit-area" x="380" y="150" width="120" height="60" rx="4"/>
+                <circle class="sector-dot" cx="440" cy="180" r="8"/>
+                <text class="sector-label" x="350" y="128">Mulsanne</text>
+                <text class="sector-label-sub" x="350" y="143">Straight</text>
+                <line class="sector-connector" x1="440" y1="172" x2="440" y2="148"/>
+              </g>
+
+              <!-- 구간 4: Indianapolis -->
+              <g class="circuit-sector" data-sector="indianapolis" tabindex="0" role="button" aria-label="Indianapolis 구간 정보">
+                <rect class="sector-hit-area" x="720" y="148" width="110" height="60" rx="4"/>
+                <circle class="sector-dot" cx="770" cy="168" r="8"/>
+                <text class="sector-label" x="790" y="120">Indianapolis</text>
+                <text class="sector-label-sub" x="790" y="135">Corner</text>
+                <line class="sector-connector" x1="778" y1="162" x2="800" y2="140"/>
+              </g>
+
+              <!-- 구간 5: Porsche Curves -->
+              <g class="circuit-sector" data-sector="porsche" tabindex="0" role="button" aria-label="Porsche Curves 구간 정보">
+                <rect class="sector-hit-area" x="740" y="370" width="100" height="60" rx="4"/>
+                <circle class="sector-dot" cx="760" cy="380" r="8"/>
+                <text class="sector-label" x="820" y="345">Porsche</text>
+                <text class="sector-label-sub" x="820" y="360">Curves</text>
+                <line class="sector-connector" x1="768" y1="380" x2="830" y2="362"/>
+              </g>
+
+              <!-- 구간 6: Ford Curves (마지막 섹터) -->
+              <g class="circuit-sector" data-sector="final" tabindex="0" role="button" aria-label="Maison Blanche 구간 정보">
+                <rect class="sector-hit-area" x="380" y="470" width="110" height="55" rx="4"/>
+                <circle class="sector-dot" cx="520" cy="495" r="8"/>
+                <text class="sector-label" x="300" y="520">Maison</text>
+                <text class="sector-label-sub" x="300" y="535">Blanche</text>
+                <line class="sector-connector" x1="503" y1="498" x2="380" y2="520"/>
+              </g>
+
+              <!-- 스타트/피니시 라인 -->
+              <line class="start-finish-line" x1="118" y1="370" x2="135" y2="415"/>
+              <text class="start-finish-label" x="60" y="400">S/F</text>
+
+              <!-- 방향 화살표 -->
+              <path class="circuit-arrow" d="M 160 200 L 175 195 L 168 205 Z"/>
+              <path class="circuit-arrow" d="M 500 167 L 510 160 L 512 172 Z"/>
+
+            </svg>
+          </div>
+        </div>
+
+        <!-- 구간 상세 정보 패널 -->
+        <div id="circuit-sector-info" class="circuit-sector-info-panel">
+          <div class="circuit-sector-placeholder">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            <p>위 지도에서 구간을 선택하면<br>상세 정보가 여기에 표시됩니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 5: CLASS COMPARISON (클래스 비교) -->
+      <section id="section-compare" class="app-section">
+        <h1 class="section-title"><span>Classes</span>클래스 비교 가이드</h1>
+        <p class="section-subtitle">르망 24시에 동시에 출전하는 세 클래스의 차량 사양을 탭으로 비교해 보세요.</p>
+
+        <!-- Tap Selection Navigation -->
+        <div class="tabs-container">
+          <button class="tab-btn active" data-class="hypercar" aria-label="하이퍼카 클래스 정보 보기"><span>Hypercar</span></button>
+          <button class="tab-btn" data-class="lmp2" aria-label="LMP2 클래스 정보 보기"><span>LMP2</span></button>
+          <button class="tab-btn" data-class="lmgt3" aria-label="LMGT3 클래스 정보 보기"><span>LMGT3</span></button>
+        </div>
+
+        <!-- Class Details Card Panels -->
+        <div class="class-details">
+          
+          <!-- Panel 1: Hypercar -->
+          <div id="panel-hypercar" class="class-panel active">
+            <div class="glass-card">
+              <div class="class-header">
+                <span class="class-name">Hypercar</span>
+                <span class="class-difficulty difficulty-high">상급 난이도</span>
+              </div>
+              
+              <!-- Miniature Car Image -->
+              <div class="class-image-container">
+                <img src="./assets/hypercar.png" alt="Hypercar 클래스 3D 미니어처 모형 차량 외관">
+              </div>
+
+              <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary); margin-bottom: 16px;">
+                최첨단 에어로다이내믹스 기술과 하이브리드 엔진이 결합된 내구레이스 최상위 프로토타입 클래스입니다. 전용 레이스 규정에 따라 커스텀 디자인되며 제조사 기술의 정수를 보여줍니다.
+              </p>
+              <div class="class-meta-grid">
+                <div class="class-meta-item">
+                  <div class="class-meta-label">대표 제조사</div>
+                  <div class="class-meta-value">제네시스, 페라리, 포르쉐</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">최고 출력</div>
+                  <div class="class-meta-value">약 680 마력</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">최저 중량</div>
+                  <div class="class-meta-value">1,030 kg</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">하이브리드</div>
+                  <div class="class-meta-value">필수 탑재</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 2: LMP2 -->
+          <div id="panel-lmp2" class="class-panel">
+            <div class="glass-card">
+              <div class="class-header">
+                <span class="class-name">LMP2</span>
+                <span class="class-difficulty difficulty-mid">중급 난이도</span>
+              </div>
+
+              <!-- Miniature Car Image -->
+              <div class="class-image-container">
+                <img src="./assets/lmp2.png" alt="LMP2 클래스 3D 미니어처 모형 차량 외관">
+              </div>
+
+              <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary); margin-bottom: 16px;">
+                정해진 스펙의 섀시(오레카 섀시 고정)와 깁슨 V8 엔진만을 사용할 수 있는 단일화 규정 클래스입니다. 제조사 싸움보다는 드라이버의 실력과 피트 스톱 효율이 큰 차이를 냅니다.
+              </p>
+              <div class="class-meta-grid">
+                <div class="class-meta-item">
+                  <div class="class-meta-label">대표 섀시</div>
+                  <div class="class-meta-value">Oreca 07 (깁슨 V8)</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">최고 출력</div>
+                  <div class="class-meta-value">약 540 마력</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">최저 중량</div>
+                  <div class="class-meta-value">950 kg</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">하이브리드</div>
+                  <div class="class-meta-value">미지원</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel 3: LMGT3 -->
+          <div id="panel-lmgt3" class="class-panel">
+            <div class="glass-card">
+              <div class="class-header">
+                <span class="class-name">LMGT3</span>
+                <span class="class-difficulty difficulty-low">초급 난이도</span>
+              </div>
+
+              <!-- Miniature Car Image -->
+              <div class="class-image-container">
+                <img src="./assets/lmgt3.png" alt="LMGT3 클래스 3D 미니어처 모형 차량 외관">
+              </div>
+
+              <p style="font-size: 0.88rem; line-height: 1.55; color: var(--text-secondary); margin-bottom: 16px;">
+                우리가 일반 도로에서 간혹 마주치는 슈퍼카(포르쉐 911, 페라리 296, 맥라렌 등)의 골격 레이싱 전용 규격 개량 차량들입니다. 입문자들에게 가장 친근한 디자인을 가졌습니다.
+              </p>
+              <div class="class-meta-grid">
+                <div class="class-meta-item">
+                  <div class="class-meta-label">대표 제조사</div>
+                  <div class="class-meta-value">맥라렌, 렉서스, 람보르기니</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">최고 출력</div>
+                  <div class="class-meta-value">약 500-600 마력</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">최저 중량</div>
+                  <div class="class-meta-value">1,200 kg 이상</div>
+                </div>
+                <div class="class-meta-item">
+                  <div class="class-meta-label">하이브리드</div>
+                  <div class="class-meta-value">미지원</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Side-by-Side Comparison Table (Updated per screenshot) -->
+        <h3 style="font-size: 1.05rem; font-weight: 900; font-style: italic; text-transform: uppercase; margin-bottom: 12px;">핵심 사양 한눈에 비교하기</h3>
+        <div class="comparison-table-wrapper">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th scope="col">비교 항목</th>
+                <th scope="col">HYPERCAR</th>
+                <th scope="col">LMP2</th>
+                <th scope="col">LMGT3</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="compare-row-label">성격</td>
+                <td>제조사 주도의 최상위 프로토타입</td>
+                <td>지정 섀시 기반 독립팀 프로토타입<br><em class="compare-note">(르망 24시 전용 편성)</em></td>
+                <td>양산형 슈퍼카 기반 GT3 레이서<br><em class="compare-note">(2024 신설)</em></td>
+              </tr>
+              <tr>
+                <td class="compare-row-label">최고 속도</td>
+                <td class="highlight"><strong>약 345 km/h</strong></td>
+                <td>약 320 km/h</td>
+                <td>약 300 km/h</td>
+              </tr>
+              <tr>
+                <td class="compare-row-label">출력 / 무게</td>
+                <td>680마력 / 1030kg<br><em class="compare-note">(기본 사양)</em></td>
+                <td>540마력 / 950kg</td>
+                <td>550마력 / 1300kg<br><em class="compare-note">(BoP 전)</em></td>
+              </tr>
+              <tr>
+                <td class="compare-row-label">하이브리드 구동</td>
+                <td>규정별 전륜 또는 후륜 탑재</td>
+                <td>없음</td>
+                <td>없음</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SCREEN 6: RECENT RESULTS (최근 결과) -->
+      <section id="section-results" class="app-section">
+        <h1 class="section-title"><span>Recent Winners</span>최근 우승 결과</h1>
+        <p class="section-subtitle">24시간 혹독한 시련을 뚫고 르망 최정상에 오른 역대 클래스별 우승 결과입니다.</p>
+
+        <!-- Class Filter Tabs -->
+        <div class="results-filter-tabs" role="tablist" aria-label="클래스 필터">
+          <button class="results-filter-btn active" data-class="ALL" role="tab" aria-selected="true" aria-label="전체 클래스 결과 보기">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            ALL
+          </button>
+          <button class="results-filter-btn" data-class="Hypercar" role="tab" aria-selected="false" aria-label="Hypercar 클래스 결과 보기">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m13 2-2 2.5H6l-3 3v2l2 .5V13h14v-3l2-.5V7l-3-3h-5L13 2z"/><path d="M6 13v5h3v-2h6v2h3v-5"/></svg>
+            Hypercar
+          </button>
+          <button class="results-filter-btn" data-class="LMP2" role="tab" aria-selected="false" aria-label="LMP2 클래스 결과 보기">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 4-4h10l4 4v4H3V9z"/><path d="M5 13v4h3v-2h8v2h3v-4"/><circle cx="7.5" cy="17" r="1.5"/><circle cx="16.5" cy="17" r="1.5"/></svg>
+            LMP2
+          </button>
+          <button class="results-filter-btn" data-class="LMGT3" role="tab" aria-selected="false" aria-label="LMGT3 클래스 결과 보기">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="10" width="20" height="6" rx="2"/><path d="M5 10V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+            LMGT3
+          </button>
+        </div>
+
+        <div id="results-timeline-container" class="results-timeline">
+          <!-- Loaded dynamically from app.js -->
+        </div>
+      </section>
+
+      <!-- SCREEN 7: PARTICIPATING TEAMS (참전 팀 소개) -->
+      <section id="section-teams" class="app-section">
+        <h1 class="section-title"><span>Contesters</span>출전 팀 상세 분석</h1>
+        <p class="section-subtitle">제네시스 레이싱팀을 포함한 르망의 주역들을 실시간 검색으로 분석해 보세요.</p>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="team-search-input" class="search-input" placeholder="팀명, 국가, 클래스, 특징 검색..." aria-label="출전 팀 검색">
+        </div>
+
+        <!-- Grid of Cards -->
+        <div id="teams-grid-container" class="teams-grid">
+          <!-- Loaded dynamically from app.js -->
+        </div>
+      </section>
+
+      <!-- SCREEN 8: VIDEO (영상) -->
+      <section id="section-video" class="app-section">
+        <h1 class="section-title"><span>FIA WEC Videos</span>공식 영상</h1>
+        <p class="section-subtitle">FIA World Endurance Championship 공식 유튜브 채널의 최신 영상을 확인하세요.</p>
+
+        <!-- Hero Banner: Latest Extended Highlights -->
+        <div id="video-hero-container" class="video-hero-container">
+          <!-- Rendered by youtube.js -->
+        </div>
+
+        <!-- Event-based Video Feeds -->
+        <div id="video-feed-container" class="video-feed-container">
+          <!-- Rendered by youtube.js -->
+        </div>
+
+        <!-- YouTube Channel Link -->
+        <a href="https://www.youtube.com/@FIAWEC" target="_blank" rel="noopener noreferrer" class="yt-channel-link" aria-label="FIA WEC 유튜브 채널 바로가기">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          FIA WEC 공식 유튜브 채널 바로가기
+        </a>
+      </section>
+
+    </main>
+
+    <!-- Bottom Sticky Mobile Navigation -->
+    <nav class="app-nav" aria-label="메인 탭 메뉴">
+      <button class="nav-item active" data-section="home" aria-label="홈 화면">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>홈</span>
+      </button>
+      <button class="nav-item" data-section="about" aria-label="르망 소개 화면">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>소개</span>
+      </button>
+      <button class="nav-item" data-section="guide" aria-label="관전 가이드 화면">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>가이드</span>
+      </button>
+      <button class="nav-item" data-section="circuit" aria-label="사르트 서킷 화면">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 18 L5 10 Q6 6, 9 6 L16 6 Q18 6, 19 8 L20 12 Q21 15, 19 17 L17 19 Q15 21, 12 21 L9 21 Q6 21, 5 19 Z" stroke-linejoin="round"/><circle cx="8" cy="19" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
+        <span>서킷</span>
+      </button>
+      <button class="nav-item" data-section="compare" aria-label="클래스 비교 화면">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span>클래스</span>
+      </button>
+      <button class="nav-item" data-section="results" aria-label="최근 경기 결과 화면">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+        <span>결과</span>
+      </button>
+      <button class="nav-item" data-section="teams" aria-label="참전 팀 화면">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>팀</span>
+      </button>
+      <button class="nav-item" data-section="video" aria-label="FIA WEC 영상 화면">
+        <svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        <span>영상</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- YouTube API Config & Module -->
+  <script src="./js/config.js"></script>
+  <script src="./js/youtube.js"></script>
+  <!-- Main JavaScript File -->
+  <script src="./js/app.js"></script>
+</body>
+</html>
