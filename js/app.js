@@ -403,9 +403,9 @@ function renderTeams(filterKeyword = '') {
   const keyword = filterKeyword.toLowerCase().trim();
   const filtered = teamsData.filter(team => {
     return team.name.toLowerCase().includes(keyword) ||
-           team.country.toLowerCase().includes(keyword) ||
-           team.class.toLowerCase().includes(keyword) ||
-           team.features.toLowerCase().includes(keyword);
+      team.country.toLowerCase().includes(keyword) ||
+      team.class.toLowerCase().includes(keyword) ||
+      team.features.toLowerCase().includes(keyword);
   });
 
   if (filtered.length === 0) {
@@ -640,13 +640,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const ctaBeginner = document.getElementById('cta-go-beginner');
-  const ctaResults = document.getElementById('cta-go-results');
+  const ctaVideo = document.getElementById('cta-go-video');
 
   if (ctaBeginner) {
     ctaBeginner.addEventListener('click', () => { window.location.hash = '#guide'; });
   }
-  if (ctaResults) {
-    ctaResults.addEventListener('click', () => { window.location.hash = '#results'; });
+  if (ctaVideo) {
+    ctaVideo.addEventListener('click', () => { window.location.hash = '#video'; });
   }
 
   window.addEventListener('hashchange', handleRouting);

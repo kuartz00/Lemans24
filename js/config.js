@@ -11,5 +11,6 @@
 window.YT_API_KEY = '';
 
 // FIA WEC YouTube Channel ID (Official: youtube.com/@FIAWEC)
-window.FIA_WEC_CHANNEL_ID = 'UCgnpv3zS4h2nI5eD995q1yA';
+// Correct channel ID verified via RSS feed (UCwU7U7PiarcJKLjDJTnANjw)
+window.FIA_WEC_CHANNEL_ID = 'UCwU7U7PiarcJKLjDJTnANjw';
 window.FIA_WEC_CHANNEL_URL = 'https://www.youtube.com/@FIAWEC';

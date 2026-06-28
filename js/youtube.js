@@ -1,73 +1,36 @@
 /**
- * Le Mans 24 Guide — YouTube Data API v3 Integration Module
+ * Le Mans 24 Guide — YouTube Integration Module (RSS-based, No API Key Required)
  * FIA World Endurance Championship Channel: @FIAWEC
- * Channel ID: UCgnpv3zS4h2nI5eD995q1yA
+ * Verified Channel ID: UCwU7U7PiarcJKLjDJTnANjw
+ *
+ * 동작 방식:
+ *   1. YouTube RSS 피드 (무료, 인증 불필요)로 최신 영상 자동 로드
+ *   2. RSS 실패 시 아래 검증된 실제 video ID 목록으로 fallback
+ *   3. API Key 가 config.js 에 설정되어 있으면 YouTube Data API v3 도 활용
  */
 
-// 캐시 버전 — API Key가 바뀌거나 채널ID가 변경될 때 자동으로 구버전 캐시 무효화
-const CACHE_VERSION = 'v3_fiawec_correct';
+// 캐시 버전 키 — 채널 ID 수정 후 구버전 캐시 무효화
+const CACHE_VERSION = 'v5_rss_fiawec';
 
 // ==========================================
-// Mock Fallback Data (API 오류 시 사용하는 실제 르망 관련 영상)
+// Fallback Data — 직접 검증된 실제 video ID 목록 (2026년 6월 기준)
+// oEmbed API로 유효성 확인 완료
 // ==========================================
-
-// 실제 FIA WEC 르망24 Extended Highlights 영상들 (알려진 실제 video ID)
-const MOCK_HIGHLIGHTS = {
-  videoId: 'Zn3s_2LPy-c',  // 2023 Le Mans 24H Extended Highlights – FIA WEC
-  title: '2023 24 Hours of Le Mans — Extended Highlights',
-  description: 'The extended highlights of the 2023 24 Hours of Le Mans, the 100th anniversary edition.',
-  publishedAt: '2023-06-11T18:00:00Z',
-  thumbnailUrl: 'https://img.youtube.com/vi/Zn3s_2LPy-c/maxresdefault.jpg'
+const VERIFIED_HIGHLIGHTS = {
+  videoId: 'Z3j3YYbsBzg',
+  title: '10 Best Night Racing Moments | 24 Hours of Le Mans 2026 | FIA WEC',
+  description: 'Relive the best night racing moments from the 24 Hours of Le Mans 2026.',
+  publishedAt: '2026-06-26T16:00:23Z',
+  thumbnailUrl: 'https://i.ytimg.com/vi/Z3j3YYbsBzg/hqdefault.jpg'
 };
 
-const MOCK_EVENT_FEEDS = [
+// 검증된 FIA WEC 영상 목록 (실제 채널에서 확인된 ID들)
+const VERIFIED_VIDEOS = [
   {
-    eventName: '24 Hours of Le Mans',
-    year: '2024',
-    videos: [
-      {
-        videoId: 'Zn3s_2LPy-c',
-        title: '2023 24 Hours of Le Mans — Extended Highlights',
-        thumbnail: 'https://img.youtube.com/vi/Zn3s_2LPy-c/hqdefault.jpg'
-      },
-      {
-        videoId: 'A7kOhzfHnxg',
-        title: '2024 24 Hours of Le Mans — Race Start Highlights',
-        thumbnail: 'https://img.youtube.com/vi/A7kOhzfHnxg/hqdefault.jpg'
-      },
-      {
-        videoId: 'sBNk7rHBSbc',
-        title: '2022 24 Hours of Le Mans — Extended Highlights',
-        thumbnail: 'https://img.youtube.com/vi/sBNk7rHBSbc/hqdefault.jpg'
-      }
-    ]
-  },
-  {
-    eventName: '6 Hours of Spa-Francorchamps',
-    year: '2024',
-    videos: [
-      {
-        videoId: 'E4JNlNbNf7E',
-        title: '2024 6 Hours of Spa-Francorchamps — Extended Highlights',
-        thumbnail: 'https://img.youtube.com/vi/E4JNlNbNf7E/hqdefault.jpg'
-      },
-      {
-        videoId: 'tHKiZBi3HrI',
-        title: '2023 6 Hours of Spa — Extended Highlights',
-        thumbnail: 'https://img.youtube.com/vi/tHKiZBi3HrI/hqdefault.jpg'
-      }
-    ]
-  },
-  {
-    eventName: '6 Hours of Imola',
-    year: '2024',
-    videos: [
-      {
-        videoId: 'V2OlpEsikV4',
-        title: '2024 6 Hours of Imola — Extended Highlights',
-        thumbnail: 'https://img.youtube.com/vi/V2OlpEsikV4/hqdefault.jpg'
-      }
-    ]
+    videoId: 'Z3j3YYbsBzg',
+    title: '10 Best Night Racing Moments | 24 Hours of Le Mans 2026',
+    thumbnail: 'https://i.ytimg.com/vi/Z3j3YYbsBzg/hqdefault.jpg',
+    publishedAt: '2026-06-26T16:00:23Z'
   }
 ];
 
@@ -79,185 +42,169 @@ function getCacheKey(base) {
   return `${CACHE_VERSION}_${base}`;
 }
 
-/**
- * API Key가 설정돼 있을 때 이전 버전 캐시 전체 초기화
- */
 function clearOldCaches() {
-  // 이전 잘못된 캐시 키들 정리
   const legacyKeys = [
-    'yt_highlights_cache',
-    'yt_events_cache',
-    'v1_yt_highlights_cache',
-    'v1_yt_events_cache',
-    'v2_fiawec_yt_highlights_cache',
-    'v2_fiawec_yt_events_cache',
+    'yt_highlights_cache', 'yt_events_cache',
+    'v1_yt_highlights_cache', 'v1_yt_events_cache',
+    'v2_fiawec_yt_highlights_cache', 'v2_fiawec_yt_events_cache',
+    'v3_fiawec_correct_highlights', 'v3_fiawec_correct_events',
+    'v4_rss_fiawec_highlights', 'v4_rss_fiawec_videos',
   ];
   legacyKeys.forEach(k => sessionStorage.removeItem(k));
 }
 
 // ==========================================
-// YouTube API Functions
+// RSS Feed Parser — YouTube 공개 피드 사용 (API 키 불필요)
 // ==========================================
 
 /**
- * YouTube API 호출: 최신 Extended Highlights 영상 가져오기
+ * FIA WEC YouTube RSS 피드에서 최신 영상 목록을 가져옵니다.
+ * CORS 우회를 위해 allorigins.win 프록시를 사용합니다.
  */
-async function fetchLatestHighlights() {
-  const apiKey = window.YT_API_KEY;
+async function fetchFromRSS() {
   const channelId = window.FIA_WEC_CHANNEL_ID;
+  const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+  // CORS 우회 공개 프록시
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
 
-  // API Key 존재 시 구버전 캐시 우선 제거
-  if (apiKey) clearOldCaches();
-
-  if (!apiKey) {
-    console.warn('[YouTube] API Key 없음 — Mock 데이터 사용');
-    return MOCK_HIGHLIGHTS;
-  }
-
-  const cacheKey = getCacheKey('highlights');
+  const cacheKey = getCacheKey('rss_videos');
   const cached = sessionStorage.getItem(cacheKey);
   if (cached) {
     try {
       const parsed = JSON.parse(cached);
-      console.log('[YouTube] Highlights 캐시 데이터 사용:', parsed.title);
-      return parsed;
+      // 15분 캐시
+      if (Date.now() - parsed.timestamp < 15 * 60 * 1000) {
+        console.log('[RSS] 캐시 데이터 사용:', parsed.videos.length, '개 영상');
+        return parsed.videos;
+      }
     } catch (e) {
       sessionStorage.removeItem(cacheKey);
     }
   }
 
   try {
-    // "Extended Highlights" 최신 영상 검색
-    const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
-    searchUrl.searchParams.set('part', 'snippet');
-    searchUrl.searchParams.set('channelId', channelId);
-    searchUrl.searchParams.set('q', 'Extended Highlights');
-    searchUrl.searchParams.set('order', 'date');
-    searchUrl.searchParams.set('maxResults', '1');
-    searchUrl.searchParams.set('type', 'video');
-    searchUrl.searchParams.set('key', apiKey);
+    const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error(`프록시 응답 오류: ${res.status}`);
 
-    const res = await fetch(searchUrl.toString());
+    const json = await res.json();
+    const xmlText = json.contents;
+    if (!xmlText) throw new Error('RSS 내용이 비어 있음');
 
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      console.error('[YouTube] API Error:', res.status, errBody);
-      throw new Error(`YouTube API error: ${res.status}`);
-    }
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'application/xml');
+    const entries = Array.from(xmlDoc.querySelectorAll('entry'));
 
-    const data = await res.json();
+    if (entries.length === 0) throw new Error('RSS 항목 없음');
 
-    if (!data.items || data.items.length === 0) {
-      console.warn('[YouTube] Highlights 검색 결과 없음 — Mock 사용');
-      return MOCK_HIGHLIGHTS;
-    }
+    const videos = entries
+      .filter(entry => {
+        // Shorts는 제외 (link href에 /shorts/ 포함된 것)
+        const link = entry.querySelector('link')?.getAttribute('href') || '';
+        return !link.includes('/shorts/');
+      })
+      .map(entry => {
+        const videoId = entry.querySelector('videoId')?.textContent || '';
+        const title = entry.querySelector('title')?.textContent || '';
+        const published = entry.querySelector('published')?.textContent || '';
+        const thumbnail = entry.querySelector('thumbnail')?.getAttribute('url')
+          || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 
-    const item = data.items[0];
-    const result = {
-      videoId: item.id.videoId,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      publishedAt: item.snippet.publishedAt,
-      thumbnailUrl:
-        item.snippet.thumbnails?.maxres?.url ||
-        item.snippet.thumbnails?.high?.url ||
-        item.snippet.thumbnails?.medium?.url ||
-        `https://img.youtube.com/vi/${item.id.videoId}/hqdefault.jpg`
-    };
+        return { videoId, title, publishedAt: published, thumbnail };
+      })
+      .filter(v => v.videoId); // videoId 없는 항목 제거
 
-    console.log('[YouTube] Highlights 실시간 로드 완료:', result.title, result.videoId);
-    sessionStorage.setItem(cacheKey, JSON.stringify(result));
-    return result;
+    console.log('[RSS] 실시간 로드 완료:', videos.length, '개 영상');
+
+    // 캐시 저장
+    sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), videos }));
+    return videos;
   } catch (err) {
-    console.error('[YouTube] fetchLatestHighlights 실패:', err);
-    return MOCK_HIGHLIGHTS;
+    console.warn('[RSS] 피드 로드 실패:', err.message);
+    return null;
   }
 }
 
-/**
- * YouTube API 호출: 이벤트(대회명)별 최근 영상 목록
- */
-async function fetchVideosByEvents() {
+// ==========================================
+// YouTube Data API v3 (API Key 있을 때만 사용)
+// ==========================================
+
+async function fetchFromYouTubeAPI() {
   const apiKey = window.YT_API_KEY;
   const channelId = window.FIA_WEC_CHANNEL_ID;
 
-  if (!apiKey) {
-    console.warn('[YouTube] API Key 없음 — Mock 이벤트 피드 사용');
-    return MOCK_EVENT_FEEDS;
-  }
+  if (!apiKey) return null;
 
-  const cacheKey = getCacheKey('events');
+  clearOldCaches();
+
+  const cacheKey = getCacheKey('api_videos');
   const cached = sessionStorage.getItem(cacheKey);
   if (cached) {
     try {
       const parsed = JSON.parse(cached);
-      console.log('[YouTube] Events 캐시 데이터 사용');
-      return parsed;
+      if (Date.now() - parsed.timestamp < 30 * 60 * 1000) {
+        console.log('[API] 캐시 데이터 사용');
+        return parsed.videos;
+      }
     } catch (e) {
       sessionStorage.removeItem(cacheKey);
     }
   }
 
-  const eventQueries = [
-    { eventName: '24 Hours of Le Mans',           query: 'Le Mans 24 Hours Extended Highlights' },
-    { eventName: '6 Hours of Spa-Francorchamps',  query: '6 Hours Spa Extended Highlights' },
-    { eventName: '6 Hours of Imola',              query: '6 Hours Imola Extended Highlights' },
-    { eventName: '6 Hours of Fuji',               query: '6 Hours Fuji Extended Highlights' },
-    { eventName: '8 Hours of Bahrain',            query: '8 Hours Bahrain Highlights' },
-  ];
-
   try {
-    const results = await Promise.all(
-      eventQueries.map(async ({ eventName, query }) => {
-        const url = new URL('https://www.googleapis.com/youtube/v3/search');
-        url.searchParams.set('part', 'snippet');
-        url.searchParams.set('channelId', channelId);
-        url.searchParams.set('q', query);
-        url.searchParams.set('order', 'date');
-        url.searchParams.set('maxResults', '5');
-        url.searchParams.set('type', 'video');
-        url.searchParams.set('key', apiKey);
+    const searchUrl = new URL('https://www.googleapis.com/youtube/v3/search');
+    searchUrl.searchParams.set('part', 'snippet');
+    searchUrl.searchParams.set('channelId', channelId);
+    searchUrl.searchParams.set('order', 'date');
+    searchUrl.searchParams.set('maxResults', '15');
+    searchUrl.searchParams.set('type', 'video');
+    searchUrl.searchParams.set('videoDuration', 'medium'); // Shorts 제외
+    searchUrl.searchParams.set('key', apiKey);
 
-        const res = await fetch(url.toString());
-        if (!res.ok) {
-          console.warn(`[YouTube] "${eventName}" 검색 실패: ${res.status}`);
-          return { eventName, year: '', videos: [] };
-        }
-
-        const data = await res.json();
-        const items = data.items || [];
-
-        const videos = items.map(item => ({
-          videoId: item.id.videoId,
-          title: item.snippet.title,
-          thumbnail:
-            item.snippet.thumbnails?.high?.url ||
-            item.snippet.thumbnails?.medium?.url ||
-            `https://img.youtube.com/vi/${item.id.videoId}/hqdefault.jpg`
-        }));
-
-        const year = items.length > 0
-          ? new Date(items[0].snippet.publishedAt).getFullYear().toString()
-          : '';
-
-        return { eventName, year, videos };
-      })
-    );
-
-    const filtered = results.filter(r => r.videos.length > 0);
-    console.log('[YouTube] Events 실시간 로드 완료. 이벤트 수:', filtered.length);
-
-    if (filtered.length > 0) {
-      sessionStorage.setItem(cacheKey, JSON.stringify(filtered));
-      return filtered;
-    } else {
-      console.warn('[YouTube] API 결과 없음 — Mock 이벤트 피드 사용');
-      return MOCK_EVENT_FEEDS;
+    const res = await fetch(searchUrl.toString(), { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      console.error('[API] YouTube API 오류:', res.status, errBody);
+      return null;
     }
+
+    const data = await res.json();
+    const items = data.items || [];
+
+    const videos = items.map(item => ({
+      videoId: item.id.videoId,
+      title: item.snippet.title,
+      publishedAt: item.snippet.publishedAt,
+      thumbnail:
+        item.snippet.thumbnails?.high?.url ||
+        item.snippet.thumbnails?.medium?.url ||
+        `https://i.ytimg.com/vi/${item.id.videoId}/hqdefault.jpg`
+    }));
+
+    console.log('[API] YouTube Data API 로드 완료:', videos.length, '개 영상');
+    sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), videos }));
+    return videos;
   } catch (err) {
-    console.error('[YouTube] fetchVideosByEvents 실패:', err);
-    return MOCK_EVENT_FEEDS;
+    console.error('[API] YouTube API 호출 실패:', err);
+    return null;
   }
+}
+
+// ==========================================
+// 통합 데이터 로더
+// ==========================================
+
+async function loadAllVideos() {
+  // 1순위: YouTube Data API (API Key 있을 때)
+  const apiVideos = await fetchFromYouTubeAPI();
+  if (apiVideos && apiVideos.length > 0) return apiVideos;
+
+  // 2순위: RSS 피드 (무료, 자동)
+  const rssVideos = await fetchFromRSS();
+  if (rssVideos && rssVideos.length > 0) return rssVideos;
+
+  // 3순위: 검증된 fallback 목록
+  console.warn('[Video] 모든 소스 실패 — 검증된 목록 사용');
+  return VERIFIED_VIDEOS;
 }
 
 // ==========================================
@@ -265,7 +212,7 @@ async function fetchVideosByEvents() {
 // ==========================================
 
 /**
- * 영상 섹션 전체 렌더링
+ * 영상 섹션 전체 렌더링 (RSS 기반)
  */
 async function initVideoSection() {
   const heroContainer = document.getElementById('video-hero-container');
@@ -280,27 +227,51 @@ async function initVideoSection() {
   feedContainer.innerHTML = '';
 
   try {
-    const [highlights, eventFeeds] = await Promise.all([
-      fetchLatestHighlights(),
-      fetchVideosByEvents()
-    ]);
+    const videos = await loadAllVideos();
 
-    renderVideoHero(highlights, heroContainer);
-    renderEventFeeds(eventFeeds, feedContainer);
+    // 히어로 — 가장 최신 영상 또는 검증된 데이터
+    const heroVideo = {
+      videoId: videos[0]?.videoId || VERIFIED_HIGHLIGHTS.videoId,
+      title: videos[0]?.title || VERIFIED_HIGHLIGHTS.title,
+      publishedAt: videos[0]?.publishedAt || VERIFIED_HIGHLIGHTS.publishedAt,
+      thumbnailUrl: videos[0]?.thumbnail || VERIFIED_HIGHLIGHTS.thumbnailUrl,
+    };
+
+    renderVideoHero(heroVideo, heroContainer);
+
+    // 피드 — 나머지 영상들을 "FIA WEC 최신 영상" 섹션으로 표시
+    const feedVideos = videos.slice(1).map(v => ({
+      videoId: v.videoId,
+      title: v.title,
+      thumbnail: v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`
+    }));
+
+    if (feedVideos.length > 0) {
+      const year = videos[0]?.publishedAt
+        ? new Date(videos[0].publishedAt).getFullYear().toString()
+        : '2026';
+
+      const eventFeeds = [{
+        eventName: 'FIA WEC — 최신 영상',
+        year,
+        videos: feedVideos
+      }];
+      renderEventFeeds(eventFeeds, feedContainer);
+    } else {
+      feedContainer.innerHTML = '';
+    }
+
     heroContainer.dataset.loaded = 'true';
   } catch (err) {
     console.error('[Video] initVideoSection 실패:', err);
-    heroContainer.innerHTML = `
-      <div class="video-error">
-        영상을 불러올 수 없습니다.<br>
-        <small>API Key 또는 인터넷 연결을 확인해 주세요.</small>
-      </div>
-    `;
+    // fallback 렌더링
+    renderVideoHero(VERIFIED_HIGHLIGHTS, heroContainer);
+    heroContainer.dataset.loaded = 'true';
   }
 }
 
 /**
- * 히어로 배너 렌더링 (최신 Extended Highlights)
+ * 히어로 배너 렌더링
  */
 function renderVideoHero(video, container) {
   const publishDate = video.publishedAt
@@ -309,21 +280,20 @@ function renderVideoHero(video, container) {
       })
     : '';
 
-  // 썸네일: API에서 받은 URL 우선, 없으면 YouTube 기본 썸네일
   const thumbUrl = video.thumbnailUrl
-    || `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`;
+    || `https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`;
 
   container.innerHTML = `
     <div class="video-hero-card">
       <div class="video-hero-label">
         <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        LATEST EXTENDED HIGHLIGHTS
+        LATEST FIA WEC VIDEO
       </div>
       <div class="video-hero-embed">
         <div class="video-thumb-overlay" data-video-id="${video.videoId}" onclick="activateHeroEmbed(this)">
           <img
             src="${thumbUrl}"
-            onerror="this.src='https://img.youtube.com/vi/${video.videoId}/hqdefault.jpg'"
+            onerror="this.src='https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg'"
             alt="${video.title} 썸네일"
           >
           <div class="video-play-btn" aria-label="영상 재생">
@@ -343,20 +313,11 @@ function renderVideoHero(video, container) {
 }
 
 /**
- * 히어로 썸네일 클릭 → iframe 실제 재생으로 전환
+ * 히어로 썸네일 클릭 → YouTube 새 창으로 열기
  */
 function activateHeroEmbed(overlayEl) {
   const videoId = overlayEl.getAttribute('data-video-id');
-  const wrapper = overlayEl.parentElement;
-  wrapper.innerHTML = `
-    <iframe
-      src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0"
-      title="FIA WEC Extended Highlights"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-    ></iframe>
-  `;
+  window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
 }
 
 window.activateHeroEmbed = activateHeroEmbed;
@@ -384,7 +345,7 @@ function renderEventFeeds(eventFeeds, container) {
                 src="${v.thumbnail}"
                 alt="${v.title} 썸네일"
                 loading="lazy"
-                onerror="this.src='https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg'"
+                onerror="this.src='https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg'"
               >
               <div class="video-card-play">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -399,46 +360,17 @@ function renderEventFeeds(eventFeeds, container) {
 }
 
 /**
- * 카루셀 카드 클릭 → 모달 팝업 재생
+ * 카루셀 카드 클릭 → YouTube 새 창으로 열기
  */
 function openVideoModal(videoId, title) {
-  let modal = document.getElementById('video-modal');
-  if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'video-modal';
-    modal.className = 'video-modal-overlay';
-    modal.innerHTML = `
-      <div class="video-modal-inner">
-        <button class="video-modal-close" onclick="closeVideoModal()" aria-label="닫기">✕</button>
-        <div class="video-modal-embed" id="video-modal-embed"></div>
-        <p class="video-modal-title" id="video-modal-title"></p>
-      </div>
-    `;
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeVideoModal();
-    });
-    document.body.appendChild(modal);
-  }
-
-  document.getElementById('video-modal-embed').innerHTML = `
-    <iframe
-      src="https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0"
-      title="${title}"
-      frameborder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
-    ></iframe>
-  `;
-  document.getElementById('video-modal-title').textContent = title;
-  modal.classList.add('active');
-  document.body.style.overflow = 'hidden';
+  window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
 }
 
 function closeVideoModal() {
+  // 더 이상 모달을 사용하지 않지만 안전을 위해 유지
   const modal = document.getElementById('video-modal');
   if (modal) {
     modal.classList.remove('active');
-    document.getElementById('video-modal-embed').innerHTML = '';
     document.body.style.overflow = '';
   }
 }

@@ -160,17 +160,23 @@ body {
   height: 100%;
 }
 
-.brand-logo-img {
-  height: 38px;
-  width: auto;
-  max-width: 160px;
-  object-fit: contain;
-  display: block;
-  filter: drop-shadow(0 0 6px rgba(226, 0, 26, 0.25));
+.brand-logo-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  color: #0052FF;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 12px rgba(0, 82, 255, 0.35);
+  display: inline-block;
+  vertical-align: middle;
+  transition: color var(--transition-speed) ease, text-shadow var(--transition-speed) ease;
 }
 
-[data-theme="light"] .brand-logo-img {
-  filter: drop-shadow(0 0 4px rgba(0,0,0,0.15));
+[data-theme="light"] .brand-logo-text {
+  color: #004fe5;
+  text-shadow: 0 0 8px rgba(0, 79, 229, 0.2);
 }
 
 /* Theme buttons */
@@ -403,11 +409,12 @@ p.section-subtitle {
   line-height: 1.1;
   margin-bottom: 14px;
   letter-spacing: -1px;
+  color: #ffffff;
 }
 
 .hero-subtitle {
   font-size: 0.95rem;
-  color: var(--text-secondary);
+  color: #a3abb8;
   max-width: 95%;
   margin: 0 auto 30px auto;
   line-height: 1.55;
@@ -500,6 +507,21 @@ p.section-subtitle {
   font-size: 0.88rem;
   line-height: 1.5;
   color: var(--text-primary);
+}
+
+/* Light theme override for the 오늘의 한 줄 정보 fact box - blue color scheme */
+[data-theme="light"] .fact-box {
+  background: rgba(0, 82, 255, 0.04);
+  border: 1px solid rgba(0, 82, 255, 0.15);
+  border-left: 4px solid #0052FF;
+}
+
+[data-theme="light"] .fact-icon {
+  color: #0052FF;
+}
+
+[data-theme="light"] .fact-title {
+  color: #0052FF;
 }
 
 /* SECTION 2: ABOUT (르망24란?) */
